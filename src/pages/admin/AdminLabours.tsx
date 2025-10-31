@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useLabourStore } from "@/store/useLabourStore";
+import { useLabour } from "@/context/LabourContext";
 import { Button } from "@/components/ui/button";
+import { AddLabourModal } from "@/components/modals/AddLabourModal";
+import { EditLabourSheet } from "@/components/modals/EditLabourSheet";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -25,7 +27,13 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function AdminLabours() {
-  const { labours, deleteLabour } = useLabourStore();
+  const {
+    labours,
+    deleteLabour,
+    setIsAddModalOpen,
+    setIsEditSheetOpen,
+    setSelectedLabour,
+  } = useLabour();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -51,7 +59,7 @@ export default function AdminLabours() {
             Manage your labour workforce
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Labour
         </Button>
@@ -127,7 +135,14 @@ export default function AdminLabours() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedLabour(labour);
+                        setIsEditSheetOpen(true);
+                      }}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
@@ -144,6 +159,9 @@ export default function AdminLabours() {
           </TableBody>
         </Table>
       </div>
+
+      <AddLabourModal />
+      <EditLabourSheet />
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>

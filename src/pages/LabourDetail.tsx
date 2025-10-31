@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { PublicHeader } from "@/components/PublicHeader";
-import { useLabourStore } from "@/store/useLabourStore";
+import { useLabour } from "@/context/LabourContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export default function LabourDetail() {
   const { id } = useParams();
-  const { getLabourById } = useLabourStore();
+  const { getLabourById } = useLabour();
   const labour = getLabourById(id || "");
 
   if (!labour) {

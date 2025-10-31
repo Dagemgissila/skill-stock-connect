@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { PublicHeader } from "@/components/PublicHeader";
-import { useItemStore } from "@/store/useItemStore";
+import { useItem } from "@/context/ItemContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export default function ItemDetail() {
   const { id } = useParams();
-  const { getItemById } = useItemStore();
+  const { getItemById } = useItem();
   const item = getItemById(id || "");
 
   if (!item) {

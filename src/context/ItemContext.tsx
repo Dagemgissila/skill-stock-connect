@@ -1,13 +1,21 @@
-import { create } from "zustand";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { StockItem } from "@/types";
 
-interface ItemState {
+interface ItemContextType {
   items: StockItem[];
   addItem: (item: StockItem) => void;
   updateItem: (id: string, item: Partial<StockItem>) => void;
   deleteItem: (id: string) => void;
   getItemById: (id: string) => StockItem | undefined;
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+  isEditSheetOpen: boolean;
+  setIsEditSheetOpen: (open: boolean) => void;
+  selectedItem: StockItem | null;
+  setSelectedItem: (item: StockItem | null) => void;
 }
+
+const ItemContext = createContext<ItemContextType | undefined>(undefined);
 
 // Mock data
 const mockItems: StockItem[] = [
@@ -101,16 +109,57 @@ const mockItems: StockItem[] = [
   },
 ];
 
-export const useItemStore = create<ItemState>((set, get) => ({
-  items: mockItems,
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  updateItem: (id, updatedItem) =>
-    set((state) => ({
-      items: state.items.map((item) =>
+export function ItemProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<StockItem[]>(mockItems);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<StockItem | null>(null);
+
+  const addItem = (item: StockItem) => {
+    setItems([...items, item]);
+  };
+
+  const updateItem = (id: string, updatedItem: Partial<StockItem>) => {
+    setItems(
+      items.map((item) =>
         item.id === id ? { ...item, ...updatedItem } : item
-      ),
-    })),
-  deleteItem: (id) =>
-    set((state) => ({ items: state.items.filter((item) => item.id !== id) })),
-  getItemById: (id) => get().items.find((item) => item.id === id),
-}));
+      )
+    );
+  };
+
+  const deleteItem = (id: string) => {
+    setItems(items.filter((item) => item.id !== id));
+  };
+
+  const getItemById = (id: string) => {
+    return items.find((item) => item.id === id);
+  };
+
+  return (
+    <ItemContext.Provider
+      value={{
+        items,
+        addItem,
+        updateItem,
+        deleteItem,
+        getItemById,
+        isAddModalOpen,
+        setIsAddModalOpen,
+        isEditSheetOpen,
+        setIsEditSheetOpen,
+        selectedItem,
+        setSelectedItem,
+      }}
+    >
+      {children}
+    </ItemContext.Provider>
+  );
+}
+
+export function useItem() {
+  const context = useContext(ItemContext);
+  if (context === undefined) {
+    throw new Error("useItem must be used within an ItemProvider");
+  }
+  return context;
+}

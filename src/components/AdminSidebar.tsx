@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, Package, Settings, Briefcase } from "lucide-react";
+import { LayoutDashboard, Users, Package, Settings, Briefcase, UserCog } from "lucide-react";
 
 const routes = [
   {
@@ -17,6 +17,11 @@ const routes = [
     label: "Stock Management",
     icon: Package,
     href: "/admin/items",
+  },
+  {
+    label: "Users",
+    icon: UserCog,
+    href: "/admin/users",
   },
   {
     label: "Settings",

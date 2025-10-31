@@ -1,13 +1,13 @@
 import { StatsCard } from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useLabourStore } from "@/store/useLabourStore";
-import { useItemStore } from "@/store/useItemStore";
+import { useLabour } from "@/context/LabourContext";
+import { useItem } from "@/context/ItemContext";
 import { Users, Package, AlertTriangle, DollarSign, TrendingUp, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
-  const { labours } = useLabourStore();
-  const { items } = useItemStore();
+  const { labours } = useLabour();
+  const { items } = useItem();
 
   const lowStockItems = items.filter((item) => item.status === "low-stock" || item.status === "out-of-stock");
   const availableLabours = labours.filter((labour) => labour.available);

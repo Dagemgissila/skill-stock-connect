@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { PublicHeader } from "@/components/PublicHeader";
-import { useItemStore } from "@/store/useItemStore";
+import { useItem } from "@/context/ItemContext";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Package } from "lucide-react";
 
 export default function Items() {
-  const { items } = useItemStore();
+  const { items } = useItem();
 
   const getStatusVariant = (status: string) => {
     switch (status) {

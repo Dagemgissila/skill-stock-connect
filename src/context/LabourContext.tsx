@@ -1,13 +1,21 @@
-import { create } from "zustand";
+import { createContext, useContext, useState, ReactNode } from "react";
 import { Labour } from "@/types";
 
-interface LabourState {
+interface LabourContextType {
   labours: Labour[];
   addLabour: (labour: Labour) => void;
   updateLabour: (id: string, labour: Partial<Labour>) => void;
   deleteLabour: (id: string) => void;
   getLabourById: (id: string) => Labour | undefined;
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+  isEditSheetOpen: boolean;
+  setIsEditSheetOpen: (open: boolean) => void;
+  selectedLabour: Labour | null;
+  setSelectedLabour: (labour: Labour | null) => void;
 }
+
+const LabourContext = createContext<LabourContextType | undefined>(undefined);
 
 // Mock data
 const mockLabours: Labour[] = [
@@ -101,21 +109,74 @@ const mockLabours: Labour[] = [
     email: "emily.taylor@example.com",
     available: true,
   },
+  {
+    id: "7",
+    name: "Michael Rodriguez",
+    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+    profession: "Civil Engineer",
+    price: 200,
+    priceUnit: "day",
+    rating: 4.9,
+    experience: "14 years",
+    skills: ["Structural Design", "Project Management", "AutoCAD", "Site Supervision"],
+    description: "Senior civil engineer with extensive experience in large-scale infrastructure projects. Expert in structural design, project planning, and construction management.",
+    phone: "+1 234 567 8907",
+    email: "michael.rodriguez@example.com",
+    available: true,
+  },
 ];
 
-export const useLabourStore = create<LabourState>((set, get) => ({
-  labours: mockLabours,
-  addLabour: (labour) =>
-    set((state) => ({ labours: [...state.labours, labour] })),
-  updateLabour: (id, updatedLabour) =>
-    set((state) => ({
-      labours: state.labours.map((labour) =>
+export function LabourProvider({ children }: { children: ReactNode }) {
+  const [labours, setLabours] = useState<Labour[]>(mockLabours);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+  const [selectedLabour, setSelectedLabour] = useState<Labour | null>(null);
+
+  const addLabour = (labour: Labour) => {
+    setLabours([...labours, labour]);
+  };
+
+  const updateLabour = (id: string, updatedLabour: Partial<Labour>) => {
+    setLabours(
+      labours.map((labour) =>
         labour.id === id ? { ...labour, ...updatedLabour } : labour
-      ),
-    })),
-  deleteLabour: (id) =>
-    set((state) => ({
-      labours: state.labours.filter((labour) => labour.id !== id),
-    })),
-  getLabourById: (id) => get().labours.find((labour) => labour.id === id),
-}));
+      )
+    );
+  };
+
+  const deleteLabour = (id: string) => {
+    setLabours(labours.filter((labour) => labour.id !== id));
+  };
+
+  const getLabourById = (id: string) => {
+    return labours.find((labour) => labour.id === id);
+  };
+
+  return (
+    <LabourContext.Provider
+      value={{
+        labours,
+        addLabour,
+        updateLabour,
+        deleteLabour,
+        getLabourById,
+        isAddModalOpen,
+        setIsAddModalOpen,
+        isEditSheetOpen,
+        setIsEditSheetOpen,
+        selectedLabour,
+        setSelectedLabour,
+      }}
+    >
+      {children}
+    </LabourContext.Provider>
+  );
+}
+
+export function useLabour() {
+  const context = useContext(LabourContext);
+  if (context === undefined) {
+    throw new Error("useLabour must be used within a LabourProvider");
+  }
+  return context;
+}

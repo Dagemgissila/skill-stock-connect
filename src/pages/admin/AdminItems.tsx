@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useItemStore } from "@/store/useItemStore";
+import { useItem } from "@/context/ItemContext";
 import { Button } from "@/components/ui/button";
+import { AddItemModal } from "@/components/modals/AddItemModal";
+import { EditItemSheet } from "@/components/modals/EditItemSheet";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -31,7 +33,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function AdminItems() {
-  const { items, deleteItem } = useItemStore();
+  const {
+    items,
+    deleteItem,
+    setIsAddModalOpen,
+    setIsEditSheetOpen,
+    setSelectedItem,
+  } = useItem();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -86,7 +94,7 @@ export default function AdminItems() {
             Manage your inventory and stock items
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setIsAddModalOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Add Item
         </Button>
@@ -169,7 +177,14 @@ export default function AdminItems() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsEditSheetOpen(true);
+                      }}
+                    >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
@@ -186,6 +201,9 @@ export default function AdminItems() {
           </TableBody>
         </Table>
       </div>
+
+      <AddItemModal />
+      <EditItemSheet />
 
       <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
