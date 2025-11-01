@@ -1,4 +1,4 @@
-import { Bell, User } from "lucide-react";
+import { Bell, User, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,21 +9,34 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function AdminHeader() {
+interface AdminHeaderProps {
+  onMenuClick: () => void;
+}
+
+export function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background">
-      <div className="flex h-16 items-center gap-4 px-6">
+      <div className="flex h-14 lg:h-16 items-center gap-2 lg:gap-4 px-4 lg:px-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
         <div className="flex-1" />
         
         <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4 lg:h-5 lg:w-5" />
           <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
+              <User className="h-4 w-4 lg:h-5 lg:w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

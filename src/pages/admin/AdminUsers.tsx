@@ -24,11 +24,11 @@ export default function AdminUsers() {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 lg:space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">User Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold mb-1 lg:mb-2">User Management</h1>
+          <p className="text-sm lg:text-base text-muted-foreground">
             Manage registered users and their accounts
           </p>
         </div>
@@ -46,15 +46,15 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Joined Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="min-w-[200px]">User</TableHead>
+              <TableHead className="min-w-[100px]">Role</TableHead>
+              <TableHead className="min-w-[120px]">Contact</TableHead>
+              <TableHead className="min-w-[120px]">Joined Date</TableHead>
+              <TableHead className="min-w-[100px]">Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,13 +65,13 @@ export default function AdminUsers() {
                     <img
                       src={user.avatar}
                       alt={user.name}
-                      className="h-10 w-10 rounded-full object-cover"
+                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
                     />
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <Mail className="h-3 w-3" />
-                        {user.email}
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{user.name}</p>
+                      <p className="text-sm text-muted-foreground flex items-center gap-1 truncate">
+                        <Mail className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">{user.email}</span>
                       </p>
                     </div>
                   </div>
@@ -83,16 +83,17 @@ export default function AdminUsers() {
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    {user.phone}
+                    <Phone className="h-3 w-3 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{user.phone}</span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="whitespace-nowrap">
                   {new Date(user.joinedDate).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
                   <Badge
                     variant={user.status === "active" ? "default" : "secondary"}
+                    className="whitespace-nowrap"
                   >
                     {user.status}
                   </Badge>

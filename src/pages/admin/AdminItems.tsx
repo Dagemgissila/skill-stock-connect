@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AddItemModal } from "@/components/modals/AddItemModal";
 import { EditItemSheet } from "@/components/modals/EditItemSheet";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   Table,
   TableBody,
@@ -86,22 +87,22 @@ export default function AdminItems() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 lg:space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Stock Management</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl lg:text-3xl font-bold mb-1 lg:mb-2">Stock Management</h1>
+          <p className="text-sm lg:text-base text-muted-foreground">
             Manage your inventory and stock items
           </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
+        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="sm:size-default">
           <Plus className="mr-2 h-4 w-4" />
           Add Item
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="relative flex-1 w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search items..."
@@ -112,7 +113,7 @@ export default function AdminItems() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" size="sm" className="sm:size-default w-full sm:w-auto">
               <Filter className="mr-2 h-4 w-4" />
               Filter: {statusFilter === "all" ? "All" : getStatusLabel(statusFilter)}
             </Button>
@@ -134,17 +135,17 @@ export default function AdminItems() {
         </DropdownMenu>
       </div>
 
-      <div className="border rounded-lg">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="min-w-[200px]">Item</TableHead>
+              <TableHead className="min-w-[120px]">Category</TableHead>
+              <TableHead className="min-w-[80px]">Price</TableHead>
+              <TableHead className="min-w-[100px]">Quantity</TableHead>
+              <TableHead className="min-w-[120px]">Supplier</TableHead>
+              <TableHead className="min-w-[100px]">Status</TableHead>
+              <TableHead className="text-right min-w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -155,23 +156,26 @@ export default function AdminItems() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="h-10 w-10 rounded object-cover bg-muted"
+                      className="h-10 w-10 rounded object-cover bg-muted flex-shrink-0"
                     />
-                    <p className="font-medium">{item.name}</p>
+                    <p className="font-medium truncate">{item.name}</p>
                   </div>
                 </TableCell>
                 <TableCell>{item.category}</TableCell>
-                <TableCell className="font-medium">${item.price}</TableCell>
+                <TableCell className="font-medium whitespace-nowrap">${item.price}</TableCell>
                 <TableCell>
-                  <span className={item.quantity < 20 ? "text-warning font-medium" : ""}>
+                  <span className={cn(
+                    "whitespace-nowrap",
+                    item.quantity < 20 && "text-warning font-medium"
+                  )}>
                     {item.quantity} units
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {item.supplierName || "—"}
+                  <span className="truncate">{item.supplierName || "—"}</span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant={getStatusVariant(item.status)}>
+                  <Badge variant={getStatusVariant(item.status)} className="whitespace-nowrap">
                     {getStatusLabel(item.status)}
                   </Badge>
                 </TableCell>
