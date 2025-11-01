@@ -61,16 +61,16 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-50 w-64 border-r bg-sidebar-background text-sidebar-foreground flex flex-col transition-transform duration-300 lg:translate-x-0",
+          "fixed lg:static inset-y-0 left-0 z-50 w-64 border-r bg-background flex flex-col transition-transform duration-300 lg:translate-x-0",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="p-4 lg:p-6 border-b border-sidebar-border flex items-center justify-between">
+        <div className="p-4 lg:p-6 border-b flex items-center justify-between">
           <Link to="/admin/dashboard" className="flex items-center space-x-2" onClick={onClose}>
-            <div className="rounded-lg bg-sidebar-primary p-2">
-              <Briefcase className="h-5 w-5 text-sidebar-primary-foreground" />
+            <div className="rounded-lg bg-primary p-2">
+              <Briefcase className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg lg:text-xl">Admin Panel</span>
+            <span className="font-bold text-lg lg:text-xl text-foreground">Admin Panel</span>
           </Link>
           <Button
             variant="ghost"
@@ -93,10 +93,10 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 to={item.href}
                 onClick={onClose}
                 className={cn(
-                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors",
+                  "flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors font-medium",
                   isActive
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                 )}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
@@ -106,7 +106,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-sidebar-border">
+        <div className="p-4 border-t">
           <Button asChild variant="ghost" className="w-full justify-start">
             <Link to="/" onClick={onClose} className="flex items-center space-x-3">
               <Home className="h-5 w-5" />

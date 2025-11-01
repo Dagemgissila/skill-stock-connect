@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PublicHeader } from "@/components/PublicHeader";
 import { useLabour } from "@/context/LabourContext";
@@ -8,6 +9,9 @@ import { Star, Clock } from "lucide-react";
 
 export default function Labours() {
   const { labours } = useLabour();
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedLabours = showAll ? labours : labours.slice(0, 6);
 
   return (
     <div className="min-h-screen">
@@ -15,14 +19,14 @@ export default function Labours() {
       
       <div className="container py-12">
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold mb-2">Browse Skilled Labour</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Browse Skilled Labour</h1>
+          <p className="text-muted-foreground text-base md:text-lg">
             Find the right professional for your project
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {labours.map((labour, index) => (
+          {displayedLabours.map((labour, index) => (
             <Card
               key={labour.id}
               className="overflow-hidden transition-all hover:shadow-xl animate-scale-in"
@@ -85,6 +89,18 @@ export default function Labours() {
             </Card>
           ))}
         </div>
+
+        {labours.length > 6 && (
+          <div className="mt-12 text-center">
+            <Button 
+              onClick={() => setShowAll(!showAll)} 
+              size="lg"
+              variant="outline"
+            >
+              {showAll ? "Show Less" : `View More (${labours.length - 6} more)`}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

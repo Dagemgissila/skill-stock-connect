@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PublicHeader } from "@/components/PublicHeader";
 import { useItem } from "@/context/ItemContext";
@@ -8,6 +9,9 @@ import { Package } from "lucide-react";
 
 export default function Items() {
   const { items } = useItem();
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedItems = showAll ? items : items.slice(0, 8);
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -41,14 +45,14 @@ export default function Items() {
       
       <div className="container py-12">
         <div className="mb-8 animate-fade-in">
-          <h1 className="text-4xl font-bold mb-2">Stock Items</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Stock Items</h1>
+          <p className="text-muted-foreground text-base md:text-lg">
             Browse our inventory of quality construction materials
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map((item, index) => (
+          {displayedItems.map((item, index) => (
             <Card
               key={item.id}
               className="overflow-hidden transition-all hover:shadow-xl animate-scale-in"
@@ -90,6 +94,18 @@ export default function Items() {
             </Card>
           ))}
         </div>
+
+        {items.length > 8 && (
+          <div className="mt-12 text-center">
+            <Button 
+              onClick={() => setShowAll(!showAll)} 
+              size="lg"
+              variant="outline"
+            >
+              {showAll ? "Show Less" : `View More (${items.length - 8} more)`}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
