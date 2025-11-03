@@ -96,7 +96,7 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded overflow-hidden bg-muted">
                       <img
-                        src={item.imageUrl}
+                        src={item.image}
                         alt={item.name}
                         className="h-full w-full object-cover"
                       />

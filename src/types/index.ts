@@ -3,23 +3,23 @@
 export interface Labour {
   id: string;
   name: string;
-  imageUrl?: string;
+  image: string;
   profession: string;
   price: number;
-  priceUnit: "day" | "hour" | "project";
-  rating?: number;
-  experience: number;
+  priceUnit: "day" | "hour";
+  rating: number;
+  experience: string;
   skills: string[];
   description: string;
   phone: string;
-  email?: string;
+  email: string;
   available: boolean;
 }
 
 export interface StockItem {
   id: string;
   name: string;
-  imageUrl?: string;
+  image: string;
   price: number;
   quantity: number;
   description: string;

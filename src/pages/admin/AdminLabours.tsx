@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLabour } from "@/context/LabourContext";
+import { Button } from "@/components/ui/button";
 import { AddLabourModal } from "@/components/modals/AddLabourModal";
 import { EditLabourSheet } from "@/components/modals/EditLabourSheet";
-import { Plus, Pencil, Trash2, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -14,6 +12,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Search, Pencil, Trash2, Star } from "lucide-react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,166 +25,159 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 
-const ITEMS_PER_PAGE = 10;
-
-const AdminLabours = () => {
-  const { labours, setIsAddModalOpen, setIsEditSheetOpen, setSelectedLabour, deleteLabour } = useLabour();
+export default function AdminLabours() {
+  const {
+    labours,
+    deleteLabour,
+    setIsAddModalOpen,
+    setIsEditSheetOpen,
+    setSelectedLabour,
+  } = useLabour();
+  const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(labours.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentLabours = labours.slice(startIndex, endIndex);
+  const filteredLabours = labours.filter((labour) =>
+    labour.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    labour.profession.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const handleEdit = (labour: any) => {
-    setSelectedLabour(labour);
-    setIsEditSheetOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    deleteLabour(id);
-    setDeleteId(null);
-    toast.success("Labour deleted successfully");
+  const handleDelete = () => {
+    if (deleteId) {
+      deleteLabour(deleteId);
+      toast.success("Labour deleted successfully");
+      setDeleteId(null);
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4 lg:space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold">Labour Management</h1>
-          <p className="text-muted-foreground">Manage skilled labour and professionals</p>
+          <h1 className="text-2xl lg:text-3xl font-bold mb-1 lg:mb-2">Labour Management</h1>
+          <p className="text-sm lg:text-base text-muted-foreground">
+            Manage your labour workforce
+          </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Labour
+        <Button onClick={() => setIsAddModalOpen(true)} size="sm" className="sm:size-default">
+          <Plus className="mr-2 h-4 w-4" />
+          Add Labour
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>All Labour ({labours.length})</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Name</TableHead>
-                  <TableHead className="min-w-[120px]">Profession</TableHead>
-                  <TableHead className="min-w-[100px]">Price</TableHead>
-                  <TableHead className="min-w-[100px]">Experience</TableHead>
-                  <TableHead className="min-w-[150px]">Contact</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  <TableHead className="min-w-[100px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {currentLabours.map((labour) => (
-                  <TableRow key={labour.id}>
-                    <TableCell className="font-medium">{labour.name}</TableCell>
-                    <TableCell>{labour.profession}</TableCell>
-                    <TableCell>${labour.price}/{labour.priceUnit}</TableCell>
-                    <TableCell>{labour.experience} years</TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-1 text-sm">
-                          <Phone className="h-3 w-3" />
-                          <span>{labour.phone}</span>
-                        </div>
-                        {labour.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail className="h-3 w-3" />
-                            <span>{labour.email}</span>
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {labour.available ? (
-                        <Badge>Available</Badge>
-                      ) : (
-                        <Badge variant="secondary">Unavailable</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(labour)}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setDeleteId(labour.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search labours..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-muted-foreground">
-                Showing {startIndex + 1} to {Math.min(endIndex, labours.length)} of {labours.length} entries
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+      <div className="border rounded-lg overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[200px]">Labour</TableHead>
+              <TableHead className="min-w-[120px]">Profession</TableHead>
+              <TableHead className="min-w-[100px]">Price</TableHead>
+              <TableHead className="min-w-[80px]">Rating</TableHead>
+              <TableHead className="min-w-[150px]">Skills</TableHead>
+              <TableHead className="min-w-[100px]">Status</TableHead>
+              <TableHead className="text-right min-w-[120px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredLabours.map((labour) => (
+              <TableRow key={labour.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={labour.image}
+                      alt={labour.name}
+                      className="h-10 w-10 rounded-full object-cover flex-shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{labour.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">{labour.experience}</p>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{labour.profession}</TableCell>
+                <TableCell className="whitespace-nowrap">${labour.price}/{labour.priceUnit}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-warning text-warning flex-shrink-0" />
+                    <span className="font-medium">{labour.rating}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1">
+                    {labour.skills.slice(0, 2).map((skill) => (
+                      <Badge key={skill} variant="outline" className="text-xs whitespace-nowrap">
+                        {skill}
+                      </Badge>
+                    ))}
+                    {labour.skills.length > 2 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{labour.skills.length - 2}
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant={labour.available ? "default" : "secondary"} className="whitespace-nowrap">
+                    {labour.available ? "Available" : "Busy"}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex items-center justify-end gap-2">
                     <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedLabour(labour);
+                        setIsEditSheetOpen(true);
+                      }}
                     >
-                      {page}
+                      <Pencil className="h-4 w-4" />
                     </Button>
-                  ))}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setDeleteId(labour.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       <AddLabourModal />
       <EditLabourSheet />
 
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the labour record.
+              This action cannot be undone. This will permanently delete the labour
+              from the system.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
   );
-};
-
-export default AdminLabours;
+}

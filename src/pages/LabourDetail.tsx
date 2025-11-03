@@ -49,7 +49,7 @@ export default function LabourDetail() {
               <CardContent className="p-0">
                 <div className="aspect-[16/9] overflow-hidden rounded-t-lg">
                   <img
-                    src={labour.imageUrl}
+                    src={labour.image}
                     alt={labour.name}
                     className="w-full h-full object-cover"
                   />

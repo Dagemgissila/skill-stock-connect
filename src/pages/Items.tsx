@@ -60,7 +60,7 @@ export default function Items() {
             >
               <div className="aspect-square overflow-hidden bg-muted">
                 <img
-                  src={item.imageUrl}
+                  src={item.image}
                   alt={item.name}
                   className="w-full h-full object-cover transition-transform hover:scale-105"
                 />

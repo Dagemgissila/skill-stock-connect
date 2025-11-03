@@ -34,7 +34,7 @@ export default function Labours() {
             >
               <div className="aspect-square overflow-hidden">
                 <img
-                  src={labour.imageUrl}
+                  src={labour.image}
                   alt={labour.name}
                   className="w-full h-full object-cover transition-transform hover:scale-105"
                 />

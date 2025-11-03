@@ -1,21 +1,16 @@
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useEffect } from "react";
 import { StockItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ImageUpload } from "./ImageUpload";
-import { FormSelect } from "./FormSelect";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { itemSchema, ItemFormData } from "@/schemas/itemSchema";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ItemFormProps {
   item?: StockItem | null;
@@ -24,179 +19,167 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
-  const form = useForm<ItemFormData>({
-    resolver: zodResolver(itemSchema),
-    defaultValues: {
-      name: "",
-      category: "",
-      price: 0,
-      quantity: 0,
-      supplierName: "",
-      imageUrl: "",
-      description: "",
-      status: "in-stock",
-    },
+  const [formData, setFormData] = useState<Partial<StockItem>>({
+    name: "",
+    image: "",
+    price: 0,
+    quantity: 0,
+    description: "",
+    supplierName: "",
+    category: "",
+    status: "in-stock",
   });
 
   useEffect(() => {
     if (item) {
-      form.reset({
-        name: item.name,
-        category: item.category,
-        price: item.price,
-        quantity: item.quantity,
-        supplierName: item.supplierName || "",
-        imageUrl: item.imageUrl || "",
-        description: item.description,
-        status: item.status,
-      });
+      setFormData(item);
     }
-  }, [item, form]);
+  }, [item]);
 
-  const handleFormSubmit = (data: ItemFormData) => {
-    const itemData: StockItem = {
+  useEffect(() => {
+    // Auto-calculate status based on quantity
+    if (formData.quantity !== undefined) {
+      let newStatus: "in-stock" | "low-stock" | "out-of-stock";
+      if (formData.quantity === 0) {
+        newStatus = "out-of-stock";
+      } else if (formData.quantity < 20) {
+        newStatus = "low-stock";
+      } else {
+        newStatus = "in-stock";
+      }
+      if (formData.status !== newStatus) {
+        setFormData((prev) => ({ ...prev, status: newStatus }));
+      }
+    }
+  }, [formData.quantity]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit({
       id: item?.id || Date.now().toString(),
-      name: data.name,
-      category: data.category,
-      price: data.price,
-      quantity: data.quantity,
-      supplierName: data.supplierName,
-      description: data.description,
-      status: data.status,
-      imageUrl: data.imageUrl || undefined,
-    };
-    onSubmit(itemData);
+      ...formData,
+    } as StockItem);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="category"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Category *</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="price"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Price *</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" step="0.01" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="quantity"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Quantity *</FormLabel>
-                <FormControl>
-                  <Input {...field} type="number" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="supplierName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Supplier Name *</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Status *</FormLabel>
-                <FormControl>
-                  <FormSelect
-                    label=""
-                    value={field.value}
-                    onChange={field.onChange}
-                    options={[
-                      { value: "in-stock", label: "In Stock" },
-                      { value: "low-stock", label: "Low Stock" },
-                      { value: "out-of-stock", label: "Out of Stock" },
-                    ]}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="name">Item Name</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="Enter item name"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Input
+          id="category"
+          value={formData.category}
+          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+          placeholder="e.g., Construction Materials"
+          required
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="price">Price ($)</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            value={formData.price}
+            onChange={(e) =>
+              setFormData({ ...formData, price: parseFloat(e.target.value) })
+            }
+            placeholder="0.00"
+            required
           />
         </div>
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description *</FormLabel>
-              <FormControl>
-                <Textarea {...field} rows={3} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="imageUrl"
-          render={({ field }) => (
-            <FormItem>
-              <FormControl>
-                <ImageUpload
-                  label="Image URL"
-                  value={field.value || ""}
-                  onChange={field.onChange}
-                  error={form.formState.errors.imageUrl?.message}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit">{item ? "Update" : "Create"} Item</Button>
+
+        <div className="space-y-2">
+          <Label htmlFor="quantity">Quantity</Label>
+          <Input
+            id="quantity"
+            type="number"
+            value={formData.quantity}
+            onChange={(e) =>
+              setFormData({ ...formData, quantity: parseInt(e.target.value) })
+            }
+            placeholder="0"
+            required
+          />
         </div>
-      </form>
-    </Form>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="supplierName">Supplier Name</Label>
+        <Input
+          id="supplierName"
+          value={formData.supplierName}
+          onChange={(e) =>
+            setFormData({ ...formData, supplierName: e.target.value })
+          }
+          placeholder="Enter supplier name (optional)"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="image">Image URL</Label>
+        <Input
+          id="image"
+          value={formData.image}
+          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+          placeholder="https://example.com/image.jpg"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          placeholder="Describe the item"
+          rows={4}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(value: "in-stock" | "low-stock" | "out-of-stock") =>
+            setFormData({ ...formData, status: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="in-stock">In Stock</SelectItem>
+            <SelectItem value="low-stock">Low Stock</SelectItem>
+            <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit">
+          {item ? "Update" : "Create"} Item
+        </Button>
+      </div>
+    </form>
   );
 }
