@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { StockItem } from "@/types";
+import { itemSchema, ItemFormData } from "@/schemas/itemSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface ItemFormProps {
   item?: StockItem | null;
@@ -19,167 +30,204 @@ interface ItemFormProps {
 }
 
 export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
-  const [formData, setFormData] = useState<Partial<StockItem>>({
-    name: "",
-    image: "",
-    price: 0,
-    quantity: 0,
-    description: "",
-    supplierName: "",
-    category: "",
-    status: "in-stock",
+  const form = useForm<ItemFormData>({
+    resolver: zodResolver(itemSchema),
+    defaultValues: {
+      name: "",
+      image: "",
+      price: 0,
+      quantity: 0,
+      description: "",
+      supplierName: "",
+      category: "",
+      status: "in-stock",
+    },
   });
 
   useEffect(() => {
     if (item) {
-      setFormData(item);
+      form.reset({
+        name: item.name,
+        image: item.image,
+        price: item.price,
+        quantity: item.quantity,
+        description: item.description,
+        supplierName: item.supplierName || "",
+        category: item.category,
+        status: item.status,
+      });
     }
-  }, [item]);
+  }, [item, form]);
 
+  // Auto-calculate status based on quantity
+  const quantity = form.watch("quantity");
   useEffect(() => {
-    // Auto-calculate status based on quantity
-    if (formData.quantity !== undefined) {
-      let newStatus: "in-stock" | "low-stock" | "out-of-stock";
-      if (formData.quantity === 0) {
-        newStatus = "out-of-stock";
-      } else if (formData.quantity < 20) {
-        newStatus = "low-stock";
-      } else {
-        newStatus = "in-stock";
-      }
-      if (formData.status !== newStatus) {
-        setFormData((prev) => ({ ...prev, status: newStatus }));
-      }
+    if (quantity === 0) {
+      form.setValue("status", "out-of-stock");
+    } else if (quantity < 20) {
+      form.setValue("status", "low-stock");
+    } else {
+      form.setValue("status", "in-stock");
     }
-  }, [formData.quantity]);
+  }, [quantity, form]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (data: ItemFormData) => {
     onSubmit({
       id: item?.id || Date.now().toString(),
-      ...formData,
+      ...data,
     } as StockItem);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="name">Item Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter item name"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Item Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter item name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="category">Category</Label>
-        <Input
-          id="category"
-          value={formData.category}
-          onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          placeholder="e.g., Construction Materials"
-          required
+        <FormField
+          control={form.control}
+          name="category"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Construction Materials" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="price">Price ($)</Label>
-          <Input
-            id="price"
-            type="number"
-            step="0.01"
-            value={formData.price}
-            onChange={(e) =>
-              setFormData({ ...formData, price: parseFloat(e.target.value) })
-            }
-            placeholder="0.00"
-            required
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price ($)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="quantity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Quantity</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="quantity">Quantity</Label>
-          <Input
-            id="quantity"
-            type="number"
-            value={formData.quantity}
-            onChange={(e) =>
-              setFormData({ ...formData, quantity: parseInt(e.target.value) })
-            }
-            placeholder="0"
-            required
-          />
+        <FormField
+          control={form.control}
+          name="supplierName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Supplier Name (Optional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter supplier name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/image.jpg" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the item"
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="in-stock">In Stock</SelectItem>
+                  <SelectItem value="low-stock">Low Stock</SelectItem>
+                  <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {item ? "Update" : "Create"} Item
+          </Button>
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="supplierName">Supplier Name</Label>
-        <Input
-          id="supplierName"
-          value={formData.supplierName}
-          onChange={(e) =>
-            setFormData({ ...formData, supplierName: e.target.value })
-          }
-          placeholder="Enter supplier name (optional)"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="image">Image URL</Label>
-        <Input
-          id="image"
-          value={formData.image}
-          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-          placeholder="https://example.com/image.jpg"
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          placeholder="Describe the item"
-          rows={4}
-          required
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Select
-          value={formData.status}
-          onValueChange={(value: "in-stock" | "low-stock" | "out-of-stock") =>
-            setFormData({ ...formData, status: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="in-stock">In Stock</SelectItem>
-            <SelectItem value="low-stock">Low Stock</SelectItem>
-            <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          {item ? "Update" : "Create"} Item
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Labour } from "@/types";
+import { labourSchema, LabourFormData } from "@/schemas/labourSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -14,6 +16,14 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 interface LabourFormProps {
   labour?: Labour | null;
@@ -22,218 +32,275 @@ interface LabourFormProps {
 }
 
 export function LabourForm({ labour, onSubmit, onCancel }: LabourFormProps) {
-  const [formData, setFormData] = useState<Partial<Labour>>({
-    name: "",
-    image: "",
-    profession: "",
-    price: 0,
-    priceUnit: "day",
-    rating: 5,
-    experience: "",
-    skills: [],
-    description: "",
-    phone: "",
-    email: "",
-    available: true,
-  });
   const [currentSkill, setCurrentSkill] = useState("");
+
+  const form = useForm<LabourFormData>({
+    resolver: zodResolver(labourSchema),
+    defaultValues: {
+      name: "",
+      image: "",
+      profession: "",
+      price: 0,
+      priceUnit: "day",
+      experience: "",
+      skills: [],
+      description: "",
+      phone: "",
+      email: "",
+      available: true,
+    },
+  });
 
   useEffect(() => {
     if (labour) {
-      setFormData(labour);
+      form.reset({
+        name: labour.name,
+        image: labour.image,
+        profession: labour.profession,
+        price: labour.price,
+        priceUnit: labour.priceUnit,
+        experience: labour.experience,
+        skills: labour.skills,
+        description: labour.description,
+        phone: labour.phone,
+        email: labour.email,
+        available: labour.available,
+      });
     }
-  }, [labour]);
+  }, [labour, form]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (data: LabourFormData) => {
     onSubmit({
       id: labour?.id || Date.now().toString(),
-      ...formData,
+      rating: labour?.rating || 5,
+      ...data,
     } as Labour);
   };
 
   const addSkill = () => {
-    if (currentSkill.trim() && !formData.skills?.includes(currentSkill.trim())) {
-      setFormData({
-        ...formData,
-        skills: [...(formData.skills || []), currentSkill.trim()],
-      });
+    const skills = form.getValues("skills");
+    if (currentSkill.trim() && !skills.includes(currentSkill.trim())) {
+      form.setValue("skills", [...skills, currentSkill.trim()]);
       setCurrentSkill("");
     }
   };
 
   const removeSkill = (skill: string) => {
-    setFormData({
-      ...formData,
-      skills: formData.skills?.filter((s) => s !== skill) || [],
-    });
+    const skills = form.getValues("skills");
+    form.setValue("skills", skills.filter((s) => s !== skill));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="Enter labour name"
-          required
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter labour name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          placeholder="email@example.com"
-          required
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="email@example.com" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone</Label>
-        <Input
-          id="phone"
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          placeholder="+1 234 567 8900"
-          required
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input type="tel" placeholder="+1 234 567 8900" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="profession">Profession</Label>
-        <Input
-          id="profession"
-          value={formData.profession}
-          onChange={(e) => setFormData({ ...formData, profession: e.target.value })}
-          placeholder="e.g., Electrician, Plumber"
-          required
+        <FormField
+          control={form.control}
+          name="profession"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profession</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Electrician, Plumber" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="price">Price</Label>
-          <Input
-            id="price"
-            type="number"
-            value={formData.price}
-            onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-            placeholder="0"
-            required
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="priceUnit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price Unit</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="day">Per Day</SelectItem>
+                    <SelectItem value="hour">Per Hour</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="priceUnit">Price Unit</Label>
-          <Select
-            value={formData.priceUnit}
-            onValueChange={(value: "day" | "hour") =>
-              setFormData({ ...formData, priceUnit: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="day">Per Day</SelectItem>
-              <SelectItem value="hour">Per Hour</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="experience">Experience</Label>
-        <Input
-          id="experience"
-          value={formData.experience}
-          onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-          placeholder="e.g., 5 years"
-          required
+        <FormField
+          control={form.control}
+          name="experience"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Experience</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 5 years" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="image">Image URL</Label>
-        <Input
-          id="image"
-          value={formData.image}
-          onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-          placeholder="https://example.com/image.jpg"
-          required
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input placeholder="https://example.com/image.jpg" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          placeholder="Describe the labour's expertise and experience"
-          rows={4}
-          required
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the labour's expertise and experience"
+                  rows={4}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="skill">Skills</Label>
-        <div className="flex gap-2">
-          <Input
-            id="skill"
-            value={currentSkill}
-            onChange={(e) => setCurrentSkill(e.target.value)}
-            placeholder="Add a skill"
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addSkill();
-              }
-            }}
-          />
-          <Button type="button" onClick={addSkill}>
-            Add
+        <FormField
+          control={form.control}
+          name="skills"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Skills</FormLabel>
+              <div className="flex gap-2">
+                <Input
+                  value={currentSkill}
+                  onChange={(e) => setCurrentSkill(e.target.value)}
+                  placeholder="Add a skill"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addSkill();
+                    }
+                  }}
+                />
+                <Button type="button" onClick={addSkill}>
+                  Add
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {field.value.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="gap-1">
+                    {skill}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => removeSkill(skill)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="available"
+          render={({ field }) => (
+            <FormItem className="flex items-center space-x-2">
+              <FormControl>
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel className="!mt-0">Available for work</FormLabel>
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {labour ? "Update" : "Create"} Labour
           </Button>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {formData.skills?.map((skill) => (
-            <Badge key={skill} variant="secondary" className="gap-1">
-              {skill}
-              <X
-                className="h-3 w-3 cursor-pointer"
-                onClick={() => removeSkill(skill)}
-              />
-            </Badge>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="available"
-          checked={formData.available}
-          onCheckedChange={(checked) =>
-            setFormData({ ...formData, available: checked })
-          }
-        />
-        <Label htmlFor="available">Available for work</Label>
-      </div>
-
-      <div className="flex justify-end gap-3 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit">
-          {labour ? "Update" : "Create"} Labour
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

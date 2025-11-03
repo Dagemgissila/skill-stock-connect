@@ -25,6 +25,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 export default function AdminLabours() {
   const {
@@ -36,11 +44,17 @@ export default function AdminLabours() {
   } = useLabour();
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredLabours = labours.filter((labour) =>
     labour.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     labour.profession.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredLabours.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedLabours = filteredLabours.slice(startIndex, startIndex + itemsPerPage);
 
   const handleDelete = () => {
     if (deleteId) {
@@ -91,7 +105,7 @@ export default function AdminLabours() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredLabours.map((labour) => (
+            {paginatedLabours.map((labour) => (
               <TableRow key={labour.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -159,6 +173,36 @@ export default function AdminLabours() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={() => setCurrentPage(page)}
+                  isActive={currentPage === page}
+                  className="cursor-pointer"
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
 
       <AddLabourModal />
       <EditLabourSheet />
