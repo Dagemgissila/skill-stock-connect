@@ -75,7 +75,7 @@ export default function ItemDetail() {
               <CardContent className="p-0">
                 <div className="aspect-[16/9] overflow-hidden rounded-t-lg bg-muted">
                   <img
-                    src={item.image}
+                    src={item.imageUrl}
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />

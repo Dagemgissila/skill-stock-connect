@@ -171,7 +171,7 @@ export default function AdminItems() {
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <img
-                      src={item.image}
+                      src={item.imageUrl}
                       alt={item.name}
                       className="h-10 w-10 rounded object-cover bg-muted flex-shrink-0"
                     />

@@ -70,7 +70,15 @@ export function LabourForm({ labour, onSubmit, onCancel }: LabourFormProps) {
   const handleFormSubmit = (data: LabourFormData) => {
     const labourData: Labour = {
       id: labour?.id || Date.now().toString(),
-      ...data,
+      name: data.name,
+      phone: data.phone,
+      profession: data.profession,
+      price: data.price,
+      priceUnit: data.priceUnit,
+      experience: data.experience,
+      description: data.description,
+      skills: data.skills,
+      available: data.available,
       email: data.email || undefined,
       rating: data.rating || undefined,
       imageUrl: data.imageUrl || undefined,
