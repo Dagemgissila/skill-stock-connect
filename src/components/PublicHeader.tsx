@@ -50,7 +50,7 @@ export function PublicHeader() {
             </Link>
           ))}
           <Button asChild size="sm">
-            <Link to="/admin/dashboard">Admin Panel</Link>
+            <Link to="/login">Admin Login</Link>
           </Button>
         </nav>
 
@@ -83,7 +83,7 @@ export function PublicHeader() {
                   </Link>
                 ))}
                 <Button asChild className="w-full mt-4" onClick={() => setIsOpen(false)}>
-                  <Link to="/admin/dashboard">Admin Panel</Link>
+                  <Link to="/login">Admin Login</Link>
                 </Button>
               </nav>
             </SheetContent>

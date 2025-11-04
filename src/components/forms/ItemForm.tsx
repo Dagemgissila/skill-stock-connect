@@ -5,8 +5,8 @@ import { StockItem } from "@/types";
 import { itemSchema, ItemFormData } from "@/schemas/itemSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/reusable/ImageUpload";
 import {
   Select,
   SelectContent,
@@ -169,9 +169,12 @@ export function ItemForm({ item, onSubmit, onCancel }: ItemFormProps) {
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Item Image</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

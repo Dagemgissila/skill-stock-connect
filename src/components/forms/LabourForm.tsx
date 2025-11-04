@@ -6,6 +6,7 @@ import { labourSchema, LabourFormData } from "@/schemas/labourSchema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUpload } from "@/components/reusable/ImageUpload";
 import {
   Select,
   SelectContent,
@@ -211,9 +212,12 @@ export function LabourForm({ labour, onSubmit, onCancel }: LabourFormProps) {
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
+              <FormLabel>Profile Image</FormLabel>
               <FormControl>
-                <Input placeholder="https://example.com/image.jpg" {...field} />
+                <ImageUpload
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

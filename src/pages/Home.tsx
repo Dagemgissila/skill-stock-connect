@@ -165,7 +165,7 @@ export default function Home() {
             Join thousands of satisfied customers managing their projects efficiently
           </p>
           <Button asChild size="lg" className="text-lg px-8">
-            <Link to="/admin/dashboard">Access Admin Panel</Link>
+            <Link to="/login">Admin Login</Link>
           </Button>
         </div>
       </section>
